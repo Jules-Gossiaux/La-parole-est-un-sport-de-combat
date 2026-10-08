@@ -1,0 +1,15 @@
+# Secrets et variables locales
+.env
+.env.*
+!.env.example
+
+# Dépendances et sorties de build usuelles
+node_modules/
+dist/
+build/
+coverage/
+
+# Système et éditeurs
+.DS_Store
+Thumbs.db
+.idea/
