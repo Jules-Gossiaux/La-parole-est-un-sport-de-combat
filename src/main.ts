@@ -172,7 +172,7 @@ function shell(content: string, active = 'decouvrir'): string {
     </header>
     ${storageError ? '<p class="storage-warning" role="status">Le navigateur ne peut pas lire l’historique local. Vous pouvez parcourir les exercices, mais vos séances ne seront peut-être pas enregistrées.</p>' : ''}
     <main>${content}</main>
-    <footer><span>Un peu de pratique, souvent.</span><span>32 exercices · Données locales</span></footer>
+    <footer><span>La parole est un sport de combat</span><span>32 exercices</span></footer>
   `
 }
 
@@ -192,10 +192,9 @@ function renderCatalog(): void {
   root!.innerHTML = shell(`
     <section class="hero">
       <div class="hero-copy">
-        <p class="eyebrow">PRENDRE LA PAROLE, ÇA SE PRATIQUE</p>
         <h1>Une idée.<br>Une voix.<br><span>À vous.</span></h1>
         <p class="hero-lede">Trente-deux exercices pour s’entraîner à son rythme, seul ou à plusieurs.</p>
-        <a class="text-link" href="#catalogue">Voir les exercices <span>↓</span></a>
+        <a class="text-link" href="#catalogue">Voir les exercices <span aria-hidden="true">↓</span></a>
       </div>
       <div class="hero-ribbons" aria-hidden="true">
         <div class="ribbon ribbon-white ribbon-one">TROUVER SES MOTS</div>
@@ -205,7 +204,7 @@ function renderCatalog(): void {
       </div>
     </section>
     <section class="catalogue" id="catalogue">
-      <div class="section-heading"><div><p class="eyebrow">LE CATALOGUE</p><h2>Choisissez votre terrain.</h2></div><span class="result-count">${filtered.length} exercice${filtered.length > 1 ? 's' : ''}</span></div>
+      <div class="section-heading"><div><h2>Choisissez votre terrain.</h2></div><span class="result-count">${filtered.length} exercice${filtered.length > 1 ? 's' : ''}</span></div>
       <div class="filters" aria-label="Filtres des exercices">
         <label class="search-box"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Un exercice, une idée…" value="${escapeHtml(query)}" aria-label="Rechercher un exercice"></label>
         <label class="select-wrap"><span class="sr-only">Participants</span><select id="mode-filter"><option value="tous">Tous les formats</option><option value="solo" ${selectedMode === 'solo' ? 'selected' : ''}>En solo</option><option value="duo" ${selectedMode === 'duo' ? 'selected' : ''}>À deux</option><option value="groupe" ${selectedMode === 'groupe' ? 'selected' : ''}>En groupe</option></select></label>
@@ -214,18 +213,16 @@ function renderCatalog(): void {
       </div>
       ${filtered.length ? `<section class="exercise-section"><div class="exercise-grid">${filtered.map(card).join('')}</div></section>` : ''}
       ${!filtered.length ? '<div class="empty-state"><h3>Aucun exercice ne correspond.</h3><p>Essayez un autre filtre ou un mot différent.</p><button class="button button-quiet" data-action="clear-filters">Effacer les filtres</button></div>' : ''}
-      <p class="catalogue-footnote">Les durées sont indicatives. L’important, c’est de se lancer.</p>
     </section>
   `)
   bindCatalogControls()
 }
 
 function card(exercise: Exercise): string {
-  return `<article class="exercise-card">
-    <div class="card-top"><span class="theme-label">${escapeHtml(exercise.theme)}</span><span class="availability-tag">PRÊT À JOUER</span></div>
+  return `<article class="exercise-card" role="button" tabindex="0" data-action="open-exercise" data-id="${exercise.id}" aria-label="Jouer à ${escapeHtml(exercise.title)}">
+    <div class="card-top"><span class="theme-label">${escapeHtml(exercise.theme)}</span><span class="card-duration">${escapeHtml(exercise.duration)}</span></div>
     <h3>${escapeHtml(exercise.title)}</h3><p>${escapeHtml(exercise.description.slice(0, 128))}${exercise.description.length > 128 ? '…' : ''}</p>
-    <div class="card-meta"><span>${escapeHtml(exercise.format)}</span><span>${escapeHtml(exercise.duration)}</span></div>
-    <button class="card-action" data-action="open-exercise" data-id="${exercise.id}" aria-label="Découvrir ${escapeHtml(exercise.title)}">Découvrir l’exercice <span>↗</span></button>
+    <div class="card-meta"><span>${escapeHtml(exercise.format)}</span><span class="card-arrow" aria-hidden="true">↗</span></div>
   </article>`
 }
 
@@ -268,7 +265,7 @@ function renderDetail(exercise: Exercise): void {
           <div class="detail-block"><p class="eyebrow">FORMAT ET MATÉRIEL</p><p class="detail-format">${escapeHtml(exercise.format)}</p><ul class="material-list">${design.materials.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul><p class="muted">${escapeHtml(design.guidance)}</p></div>
           ${design.roles.length > 1 ? `<div class="detail-block"><p class="eyebrow">RÔLES À DISTRIBUER</p><p class="role-summary">${design.roles.map(escapeHtml).join(' · ')}</p></div>` : ''}
         </article>
-        <aside class="start-card"><span class="start-mark"></span><p class="eyebrow">PRÊT·E À ESSAYER ?</p><h2>Une première<br>répétition.</h2><p>Pas besoin de réussir du premier coup. Prenez votre temps, puis recommencez.</p><button class="button button-primary" data-action="start-session" data-id="${exercise.id}">Lancer la séance <span>→</span></button><span class="private-caption">Sans compte · sauvegarde sur cet appareil</span></aside>
+        <aside class="start-card"><span class="start-mark"></span><h2>À vous de jouer.</h2><button class="button button-primary" data-action="start-session" data-id="${exercise.id}">Lancer la séance <span>→</span></button></aside>
       </div>
     </section>
   `)
@@ -327,7 +324,7 @@ function renderGameWidget(current: PracticeSession): string {
     return `<section class="game-widget"><div class="widget-heading"><h2>${escapeHtml(widget.title)}</h2></div><ul class="widget-checklist">${widget.items.map((item, index) => `<li><button data-action="toggle-check" data-index="${index}" aria-pressed="${current.checkedItems[index] ? 'true' : 'false'}" class="check-item ${current.checkedItems[index] ? 'checked' : ''}"><span aria-hidden="true">${current.checkedItems[index] ? '✓' : ''}</span>${escapeHtml(item)}</button></li>`).join('')}</ul></section>`
   }
   if (widget.type === 'fill') {
-    return `<section class="game-widget"><div class="widget-heading"><h2>${escapeHtml(widget.title)}</h2><p>Ces mots restent dans votre navigateur et ne sont pas ajoutés au bilan.</p></div><div class="fill-fields">${widget.items.map((item, index) => `<label>${escapeHtml(item)}<input data-fill-index="${index}" maxlength="90" value="${escapeHtml(current.fillValues[index] ?? '')}" placeholder="Complétez à votre façon"></label>`).join('')}</div></section>`
+    return `<section class="game-widget"><div class="widget-heading"><h2>${escapeHtml(widget.title)}</h2></div><div class="fill-fields">${widget.items.map((item, index) => `<label>${escapeHtml(item)}<input data-fill-index="${index}" maxlength="90" value="${escapeHtml(current.fillValues[index] ?? '')}" placeholder="Votre réponse"></label>`).join('')}</div></section>`
   }
   const role = current.roles[current.round % current.roles.length] ?? ''
   return `<section class="game-widget"><div class="widget-heading"><h2>${escapeHtml(widget.title)}</h2><p>${escapeHtml(widget.description ?? '')}</p></div><div class="turn-card"><span>TOUR ${current.round + 1}</span><strong>${escapeHtml(role)}</strong><button class="button button-outline" data-action="next-turn">Tour suivant →</button></div></section>`
@@ -359,7 +356,6 @@ function renderSession(): void {
           <div class="timer" role="timer" aria-live="off">${formatTime(session.remaining)}</div>
           <div class="timer-progress"><span style="width:${progress}%"></span></div>
           <div class="timer-controls"><button class="button button-primary" data-action="toggle-timer">${session.running ? 'Pause' : session.remaining === phase.seconds ? 'Démarrer' : 'Reprendre'} <span>${session.running ? 'Ⅱ' : '▶'}</span></button><button class="button button-outline" data-action="reset-timer">Recommencer cette phase</button><button class="text-button" data-action="advance-phase">${session.phaseIndex === session.phases.length - 1 ? 'Terminer la séance' : 'Passer à la suite →'}</button></div>
-          <p class="timer-note">Le chrono est là pour vous accompagner, pas pour vous presser.</p>
         </aside>
       </div>
     </section>
@@ -443,7 +439,7 @@ function renderHistory(): void {
 }
 
 root.addEventListener('click', (event) => {
-  const target = (event.target as HTMLElement).closest<HTMLButtonElement>('button[data-action]')
+  const target = (event.target as HTMLElement).closest<HTMLElement>('[data-action]')
   if (!target) return
   const action = target.dataset.action
   if (action === 'home') renderCatalog()
@@ -516,6 +512,15 @@ root.addEventListener('click', (event) => {
     try { localStorage.removeItem(storageKey); storageError = false } catch { storageError = true }
     renderHistory()
   }
+})
+
+root.addEventListener('keydown', (event) => {
+  const target = event.target
+  if (!(target instanceof HTMLElement) || !target.matches('.exercise-card[role="button"]')) return
+  if (event.key !== 'Enter' && event.key !== ' ') return
+  event.preventDefault()
+  const exercise = exercises.find((item) => item.id === Number(target.dataset.id))
+  if (exercise) renderDetail(exercise)
 })
 
 root.addEventListener('submit', (event) => {

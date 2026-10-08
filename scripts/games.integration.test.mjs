@@ -8,6 +8,7 @@ test('les 32 exercices s’ouvrent, déroulent leurs phases et enregistrent un b
   const globals = {
     window: globalThis.window,
     document: globalThis.document,
+    HTMLElement: globalThis.HTMLElement,
     localStorage: globalThis.localStorage,
     HTMLDivElement: globalThis.HTMLDivElement,
     HTMLButtonElement: globalThis.HTMLButtonElement,
@@ -20,6 +21,7 @@ test('les 32 exercices s’ouvrent, déroulent leurs phases et enregistrent un b
   Object.assign(globalThis, {
     window: browser,
     document: browser.document,
+    HTMLElement: browser.HTMLElement,
     localStorage: browser.localStorage,
     HTMLDivElement: browser.HTMLDivElement,
     HTMLButtonElement: browser.HTMLButtonElement,
@@ -49,8 +51,14 @@ test('les 32 exercices s’ouvrent, déroulent leurs phases et enregistrent un b
     await vite.ssrLoadModule('/src/main.ts')
     const root = browser.document.querySelector('#app')
 
+    const firstCard = root.querySelector('.exercise-card')
+    firstCard.dispatchEvent(new browser.KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }))
+    assert.ok(root.querySelector('.detail-main h1'), 'la carte doit pouvoir être ouverte au clavier')
+    click(root, 'button[data-action="home"]')
+
     for (let id = 1; id <= 32; id += 1) {
-      click(root, `button[data-action="open-exercise"][data-id="${id}"]`)
+      const card = click(root, `.exercise-card[data-action="open-exercise"][data-id="${id}"]`)
+      assert.equal(card.getAttribute('role'), 'button', `exercice ${id}: carte non interactive`)
       assert.ok(root.querySelector('.detail-main h1'), `exercice ${id}: fiche absente`)
       click(root, `button[data-action="start-session"][data-id="${id}"]`)
       assert.ok(root.querySelector('.session-page'), `exercice ${id}: séance absente`)

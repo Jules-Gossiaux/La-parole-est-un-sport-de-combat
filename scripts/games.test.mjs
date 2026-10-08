@@ -52,3 +52,14 @@ test('les activités interactives ciblées ont un outil adapté', () => {
   assert.equal(byId.get(26).widget.type, 'checklist')
   assert.equal(byId.get(31).widget.type, 'counter')
 })
+
+test('les sujets de débat sont des questions fermées', () => {
+  const debateIds = [13, 16, 17, 18, 19, 24, 26, 27, 28]
+  const byId = new Map(games.map((game) => [game.id, game]))
+  for (const id of debateIds) {
+    for (const prompt of byId.get(id).prompts) {
+      assert.ok(prompt.endsWith('?'), `exercice ${id}: le sujet doit être une question : ${prompt}`)
+      assert.doesNotMatch(prompt, /^(comment|pourquoi|que|qu['’]est-ce|quel(?:le)?s?)\b/i, `exercice ${id}: question ouverte : ${prompt}`)
+    }
+  }
+})
