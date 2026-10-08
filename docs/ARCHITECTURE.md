@@ -14,7 +14,7 @@ Le PRD décrit une application web de séances guidées. Les responsabilités ca
 - bilan privé de séance;
 - capture audio facultative et gestion locale des enregistrements.
 
-Le catalogue contient 32 fiches, dont huit sont interactives au MVP; les 24 autres sont affichées comme bientôt disponibles. Les filtres, les fiches, les sujets, le chronomètre et le bilan local sont implémentés. L’audio local et la génération de rôles ne le sont pas encore.
+Le catalogue contient 32 fiches et chaque exercice est jouable. Sa configuration dédiée fournit les sujets, les rôles, le matériel, les consignes et les phases. Des widgets spécifiques servent au comptage, au suivi d’une trame, au remplissage de phrases et au tour de parole. L’audio local et l’édition des bilans restent à développer.
 
 ## Données et frontières
 
@@ -24,4 +24,4 @@ Dates des séances devront distinguer l’instant enregistré et son affichage d
 
 ## Contenu
 
-Le catalogue de départ est dans `EXERCICES.md`. Son origine éditoriale est un ouvrage publié; vérifier les droits avant toute publication commerciale et garder les formulations du projet originales.
+Le catalogue éditorial est dans `EXERCICES.md`; les données d’exécution propres aux jeux sont dans `src/games.json`. Son origine éditoriale est un ouvrage publié; vérifier les droits avant toute publication et garder les formulations du projet originales.

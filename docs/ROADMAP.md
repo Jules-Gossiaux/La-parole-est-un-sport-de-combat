@@ -8,16 +8,15 @@ Le statut ci-dessous reflète le dépôt inspecté le 8 octobre 2026.
 - Dépôt Git local initialisé et branche de documentation créée.
 - Documentation de cadrage initiale ajoutée.
 - Catalogue de 32 exercices ajouté dans `EXERCICES.md`.
-- Prototype web : 8 exercices interactifs, 24 annoncés pour une prochaine version, filtres, fiches, sujets aléatoires, chronomètre et bilan local.
+- Prototype web : 32 exercices avec consignes, sujets, rôles, matériel et phases personnalisés; outils dédiés pour le comptage, les plans et les tours de parole.
+- Tests d’intégration des 32 parcours de fiche, séance, outil interactif, phases et bilan.
 - Stack et cible Vercel documentées.
 
 ## À faire pour le MVP
 
-- Générer des rôles pour les exercices en duo et en groupe.
 - Relire le catalogue et vérifier les droits éditoriaux avant publication.
 - Ajouter l’édition des bilans et l’enregistrement audio facultatif local.
-- Vérifier accessibilité clavier, mobile et comportements de permission.
-- Ajouter les tests adaptés et relier le projet Vercel au dépôt GitHub.
+- Compléter les essais manuels clavier/mobile et relier le projet Vercel au dépôt GitHub.
 
 ## Hors périmètre MVP
 

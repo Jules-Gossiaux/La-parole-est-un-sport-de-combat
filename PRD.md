@@ -67,18 +67,19 @@ Le site doit être un compagnon d’entraînement : il donne une structure, mais
 
 ## Catalogue d’exercices prévu
 
-Le document [docs/EXERCICES.md](docs/EXERCICES.md) contient les consignes détaillées des 32 exercices du catalogue. Le MVP initial en rend huit disponibles; les autres restent visibles avec la mention « Bientôt disponible » afin de montrer les prochaines étapes sans élargir le premier périmètre :
+Le document [docs/EXERCICES.md](docs/EXERCICES.md) contient les consignes détaillées des 32 exercices du catalogue. La version actuelle les rend tous jouables avec un déroulé adapté :
 
-| Thème | Exercices disponibles au MVP | Mode principal |
+| Thème | Exercices | Mode principal |
 |---|---|---|
-| Voix | La posture; La paille imaginaire | Solo |
+| Gestuelle | Le ventriloque; Le marionnettiste; L’imitateur; Face à l’écran | Duo/groupe ou solo |
+| Voix | La posture; La paille imaginaire; Le bâillement; Le périph; Les chaises émotionnelles; Les fruits et légumes; Les discours multicolores | Solo, duo ou groupe |
 | Vocabulaire | Le buzzer « euh » | Solo ou groupe |
-| Discours | Le mini-discours; Chronique radiophonique | Solo |
-| Débat et conviction | Le ping-pong d’arguments | Groupe |
-| Vie professionnelle | L’entretien d’embauche | Solo ou duo |
-| Médias | Le micro-trottoir | Solo ou duo |
-
-Les 24 autres exercices du catalogue sont prévus pour des versions ultérieures et apparaissent comme « Bientôt disponible » dans l’interface.
+| Discours | Le mini-discours; Chronique radiophonique; Autoportrait en texte à trous | Solo ou duo |
+| Débat et conviction | Ping-pong d’arguments; Débat selon son rôle; Débat parlementaire; Mises en situation de conviction; Vente aux enchères; Plaidoirie à partir d’un cas | Duo/groupe |
+| Vie professionnelle | Entretien d’embauche; Conférence de presse; La battle | Solo, duo ou groupe |
+| Argumentation | Le faux procès; Les catégories d’arguments; Adapter son discours au public | Solo ou groupe |
+| Médias | Le micro-trottoir; L’interview-piège; La conférence de presse de crise; Le buzzer « jargon » | Solo, duo ou groupe |
+| Discours politique | Le discours de candidature | Solo ou groupe |
 
 ## Principes de conception
 

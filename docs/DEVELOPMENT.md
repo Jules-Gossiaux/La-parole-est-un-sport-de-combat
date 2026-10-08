@@ -16,6 +16,7 @@ Vite + TypeScript, sans framework UI ni dépendance runtime. La sortie est un si
 - `npm run dev` : démarrer le serveur local Vite.
 - `npm run build` : vérifier le typage TypeScript puis générer `dist/`.
 - `npm run preview` : prévisualiser le build local.
+- `npm test` : vérifier la cohérence des 32 déroulés d’exercice.
 
 ## Variables et secrets
 

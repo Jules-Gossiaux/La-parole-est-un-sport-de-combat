@@ -4,7 +4,7 @@ Compagnon web francophone pour s’entraîner à la prise de parole, seul, à de
 
 ## État du projet
 
-Prototype web initial : 8 exercices MVP interactifs et 24 exercices annoncés comme bientôt disponibles. Le prototype inclut les fiches, les sujets aléatoires, le chronomètre en trois phases et un bilan privé dans le navigateur. L’enregistrement audio, la génération de rôles, l’édition des bilans et les contrôles automatisés restent à faire.
+Prototype web : les 32 exercices du catalogue sont jouables, chacun avec des consignes, des sujets ou scénarios, des rôles quand ils sont utiles, du matériel et des phases chronométrées spécifiques. Certains exercices ajoutent un outil interactif comme un compteur, une liste de repères ou un tour de parole. L’enregistrement audio et l’édition des bilans restent à faire.
 
 ## Démarrage
 
@@ -16,6 +16,8 @@ npm run dev
 ```
 
 Pour produire les fichiers statiques destinés à Vercel : `npm run build`. Le dossier de sortie est `dist/`.
+
+Pour vérifier les 32 parcours de jeu : `npm test`.
 
 ## Produit et confidentialité
 

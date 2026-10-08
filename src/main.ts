@@ -1,5 +1,28 @@
 import './style.css'
 import exerciseSource from '../docs/EXERCICES.md?raw'
+import gameDesignData from './games.json'
+
+type GameWidget = {
+  type: 'counter' | 'checklist' | 'fill' | 'turns'
+  title: string
+  description?: string
+  unit?: string
+  items: string[]
+}
+
+type GameDesign = {
+  id: number
+  promptLabel: string
+  prompts: string[]
+  roles: string[]
+  materials: string[]
+  instructions: string[]
+  phases: [string, string, string]
+  weights: [number, number, number]
+  phaseSeconds?: [number, number, number]
+  guidance: string
+  widget?: GameWidget
+}
 
 type Exercise = {
   id: number
@@ -10,6 +33,7 @@ type Exercise = {
   duration: string
   minutes: number
   description: string
+  design: GameDesign
 }
 
 type SessionRecord = {
@@ -22,26 +46,26 @@ type SessionRecord = {
 }
 
 type Phase = { name: string; seconds: number }
+type PracticeSession = {
+  exercise: Exercise
+  topic: string
+  roles: string[]
+  phases: Phase[]
+  phaseIndex: number
+  remaining: number
+  endAt: number | null
+  running: boolean
+  counter: number
+  checkedItems: boolean[]
+  fillValues: string[]
+  round: number
+}
 
 const storageKey = 'parole-combat.sessions.v1'
-const mvpExerciseIds = new Set([5, 6, 12, 13, 14, 16, 22, 28])
+const gameDesigns = gameDesignData as GameDesign[]
+const gameDesignsById = new Map(gameDesigns.map((design) => [design.id, design]))
 const root = document.querySelector<HTMLDivElement>('#app')
 if (!root) throw new Error('Le point de montage de l’application est absent.')
-
-const topics = [
-  'Faut-il apprendre à parler en public à l’école ?',
-  'Un objet du quotidien qui mérite plus d’attention',
-  'Une petite habitude qui a changé votre journée',
-  'Le meilleur conseil que vous ayez reçu',
-  'Faut-il toujours dire ce que l’on pense ?',
-  'Un lieu où vous aimeriez retourner',
-  'Convaincre quelqu’un de prendre plus souvent le vélo',
-  'Une invention qui simplifierait la vie de tous les jours',
-  'Pourquoi le silence peut aussi être utile',
-  'Un film ou un livre à faire découvrir',
-  'Faut-il savoir improviser pour bien communiquer ?',
-  'Une règle que vous aimeriez changer',
-]
 
 const exercises = parseExercises(exerciseSource)
 const themes = [...new Set(exercises.map((exercise) => exercise.theme))]
@@ -50,7 +74,7 @@ let selectedTheme = 'tous'
 let selectedDuration = 'toutes'
 let query = ''
 let selectedExercise: Exercise | null = null
-let session: { exercise: Exercise; topic: string; phases: Phase[]; phaseIndex: number; remaining: number; endAt: number | null; running: boolean } | null = null
+let session: PracticeSession | null = null
 let timerHandle: number | undefined
 let storageError = false
 
@@ -72,6 +96,8 @@ function parseExercises(markdown: string): Exercise[] {
       .join(' ')
       .replace(/\s+/g, ' ')
       .trim()
+    const design = gameDesignsById.get(current.id)
+    if (!design) throw new Error(`Aucun déroulé n’est défini pour l’exercice ${current.id}.`)
 
     items.push({
       id: current.id,
@@ -86,6 +112,7 @@ function parseExercises(markdown: string): Exercise[] {
       duration,
       minutes: Number(range?.[1] ?? single?.[1] ?? 5),
       description,
+      design,
     })
   }
 
@@ -145,7 +172,7 @@ function shell(content: string, active = 'decouvrir'): string {
     </header>
     ${storageError ? '<p class="storage-warning" role="status">Le navigateur ne peut pas lire l’historique local. Vous pouvez parcourir les exercices, mais vos séances ne seront peut-être pas enregistrées.</p>' : ''}
     <main>${content}</main>
-    <footer><span>Un peu de pratique, souvent.</span><span>8 exercices au MVP · Données locales</span></footer>
+    <footer><span>Un peu de pratique, souvent.</span><span>32 exercices · Données locales</span></footer>
   `
 }
 
@@ -162,15 +189,12 @@ function renderCatalog(): void {
     const matchesQuery = !query || `${exercise.title} ${exercise.theme} ${exercise.description}`.toLocaleLowerCase('fr').includes(query.toLocaleLowerCase('fr'))
     return matchesMode && matchesTheme && matchesDuration && matchesQuery
   })
-  const available = filtered.filter((exercise) => mvpExerciseIds.has(exercise.id))
-  const comingSoon = filtered.filter((exercise) => !mvpExerciseIds.has(exercise.id))
-
   root!.innerHTML = shell(`
     <section class="hero">
       <div class="hero-copy">
         <p class="eyebrow">PRENDRE LA PAROLE, ÇA SE PRATIQUE</p>
         <h1>Une idée.<br>Une voix.<br><span>À vous.</span></h1>
-        <p class="hero-lede">Huit exercices pour commencer à s’entraîner. Le reste arrive bientôt.</p>
+        <p class="hero-lede">Trente-deux exercices pour s’entraîner à son rythme, seul ou à plusieurs.</p>
         <a class="text-link" href="#catalogue">Voir les exercices <span>↓</span></a>
       </div>
       <div class="hero-ribbons" aria-hidden="true">
@@ -181,15 +205,14 @@ function renderCatalog(): void {
       </div>
     </section>
     <section class="catalogue" id="catalogue">
-      <div class="section-heading"><div><p class="eyebrow">LE CATALOGUE</p><h2>Choisissez votre terrain.</h2></div><span class="result-count">${available.length} disponibles <b>·</b> ${comingSoon.length} bientôt</span></div>
+      <div class="section-heading"><div><p class="eyebrow">LE CATALOGUE</p><h2>Choisissez votre terrain.</h2></div><span class="result-count">${filtered.length} exercice${filtered.length > 1 ? 's' : ''}</span></div>
       <div class="filters" aria-label="Filtres des exercices">
         <label class="search-box"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Un exercice, une idée…" value="${escapeHtml(query)}" aria-label="Rechercher un exercice"></label>
         <label class="select-wrap"><span class="sr-only">Participants</span><select id="mode-filter"><option value="tous">Tous les formats</option><option value="solo" ${selectedMode === 'solo' ? 'selected' : ''}>En solo</option><option value="duo" ${selectedMode === 'duo' ? 'selected' : ''}>À deux</option><option value="groupe" ${selectedMode === 'groupe' ? 'selected' : ''}>En groupe</option></select></label>
         <label class="select-wrap"><span class="sr-only">Thème</span><select id="theme-filter"><option value="tous">Tous les thèmes</option>${themes.map((theme) => `<option value="${escapeHtml(theme)}" ${selectedTheme === theme ? 'selected' : ''}>${escapeHtml(theme)}</option>`).join('')}</select></label>
         <label class="select-wrap"><span class="sr-only">Durée</span><select id="duration-filter"><option value="toutes">Toutes les durées</option><option value="5" ${selectedDuration === '5' ? 'selected' : ''}>5 min ou moins</option><option value="10" ${selectedDuration === '10' ? 'selected' : ''}>10 min ou moins</option><option value="long" ${selectedDuration === 'long' ? 'selected' : ''}>Plus de 10 min</option></select></label>
       </div>
-      ${available.length ? `<section class="exercise-section"><h3 class="list-heading">Pour commencer <span>${available.length} exercice${available.length > 1 ? 's' : ''}</span></h3><div class="exercise-grid">${available.map(card).join('')}</div></section>` : ''}
-      ${comingSoon.length ? `<section class="exercise-section coming-section"><h3 class="list-heading">Au programme ensuite <span>Disponibles bientôt</span></h3><div class="exercise-grid">${comingSoon.map(comingSoonCard).join('')}</div></section>` : ''}
+      ${filtered.length ? `<section class="exercise-section"><div class="exercise-grid">${filtered.map(card).join('')}</div></section>` : ''}
       ${!filtered.length ? '<div class="empty-state"><h3>Aucun exercice ne correspond.</h3><p>Essayez un autre filtre ou un mot différent.</p><button class="button button-quiet" data-action="clear-filters">Effacer les filtres</button></div>' : ''}
       <p class="catalogue-footnote">Les durées sont indicatives. L’important, c’est de se lancer.</p>
     </section>
@@ -199,19 +222,10 @@ function renderCatalog(): void {
 
 function card(exercise: Exercise): string {
   return `<article class="exercise-card">
-    <div class="card-top"><span class="theme-label">${escapeHtml(exercise.theme)}</span><span class="availability-tag">AU MVP</span></div>
+    <div class="card-top"><span class="theme-label">${escapeHtml(exercise.theme)}</span><span class="availability-tag">PRÊT À JOUER</span></div>
     <h3>${escapeHtml(exercise.title)}</h3><p>${escapeHtml(exercise.description.slice(0, 128))}${exercise.description.length > 128 ? '…' : ''}</p>
     <div class="card-meta"><span>${escapeHtml(exercise.format)}</span><span>${escapeHtml(exercise.duration)}</span></div>
     <button class="card-action" data-action="open-exercise" data-id="${exercise.id}" aria-label="Découvrir ${escapeHtml(exercise.title)}">Découvrir l’exercice <span>↗</span></button>
-  </article>`
-}
-
-function comingSoonCard(exercise: Exercise): string {
-  return `<article class="exercise-card coming-card">
-    <div class="card-top"><span class="theme-label">${escapeHtml(exercise.theme)}</span><span class="card-number">${String(exercise.id).padStart(2, '0')}</span></div>
-    <h3>${escapeHtml(exercise.title)}</h3>
-    <div class="card-meta"><span>${escapeHtml(exercise.format)}</span><span>${escapeHtml(exercise.duration)}</span></div>
-    <span class="coming-soon-label">Bientôt disponible</span>
   </article>`
 }
 
@@ -241,7 +255,7 @@ function bindCatalogControls(): void {
 
 function renderDetail(exercise: Exercise): void {
   selectedExercise = exercise
-  const steps = exercise.description.split(/(?<=\.)\s+/).filter(Boolean)
+  const { design } = exercise
   root!.innerHTML = shell(`
     <section class="detail-page">
       <button class="back-link" data-action="home">← Tous les exercices</button>
@@ -249,9 +263,10 @@ function renderDetail(exercise: Exercise): void {
         <article class="detail-main">
           <p class="eyebrow">${escapeHtml(exercise.theme)} <i></i> ${escapeHtml(exercise.duration)}</p>
           <h1>${escapeHtml(exercise.title)}<span class="title-period">.</span></h1>
-          <p class="detail-lede">${escapeHtml(steps[0] ?? exercise.description)}</p>
-          <div class="detail-block"><p class="eyebrow">LE DÉROULÉ</p><ol class="step-list">${steps.slice(1).map((step) => `<li>${escapeHtml(step)}</li>`).join('') || `<li>${escapeHtml(exercise.description)}</li>`}</ol></div>
-          <div class="detail-block"><p class="eyebrow">FORMAT</p><p class="detail-format">${escapeHtml(exercise.format)}</p><p class="muted">La séance guidée vous proposera un sujet pour démarrer. Vous pouvez aussi en choisir un autre.</p></div>
+          <p class="detail-lede">${escapeHtml(exercise.description)}</p>
+          <div class="detail-block"><p class="eyebrow">LE DÉROULÉ DE CET EXERCICE</p><ol class="step-list">${design.instructions.map((step) => `<li>${escapeHtml(step)}</li>`).join('')}</ol></div>
+          <div class="detail-block"><p class="eyebrow">FORMAT ET MATÉRIEL</p><p class="detail-format">${escapeHtml(exercise.format)}</p><ul class="material-list">${design.materials.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul><p class="muted">${escapeHtml(design.guidance)}</p></div>
+          ${design.roles.length > 1 ? `<div class="detail-block"><p class="eyebrow">RÔLES À DISTRIBUER</p><p class="role-summary">${design.roles.map(escapeHtml).join(' · ')}</p></div>` : ''}
         </article>
         <aside class="start-card"><span class="start-mark"></span><p class="eyebrow">PRÊT·E À ESSAYER ?</p><h2>Une première<br>répétition.</h2><p>Pas besoin de réussir du premier coup. Prenez votre temps, puis recommencez.</p><button class="button button-primary" data-action="start-session" data-id="${exercise.id}">Lancer la séance <span>→</span></button><span class="private-caption">Sans compte · sauvegarde sur cet appareil</span></aside>
       </div>
@@ -260,29 +275,68 @@ function renderDetail(exercise: Exercise): void {
 }
 
 function startSession(exercise: Exercise): void {
-  const total = exercise.minutes * 60
-  const prep = Math.max(30, Math.round(total * 0.2 / 15) * 15)
-  const review = Math.max(30, Math.round(total * 0.2 / 15) * 15)
-  const speak = Math.max(30, total - prep - review)
+  const design = exercise.design
+  const total = Math.max(exercise.minutes * 60, 90)
+  const firstDefault = Math.max(30, Math.round(total * design.weights[0] / 1500) * 15)
+  const secondDefault = Math.max(30, Math.round(total * design.weights[1] / 1500) * 15)
+  const defaultDurations: [number, number, number] = [
+    firstDefault,
+    secondDefault,
+    Math.max(30, total - firstDefault - secondDefault),
+  ]
+  const [first, second, third] = design.phaseSeconds ?? defaultDurations
   session = {
     exercise,
-    topic: randomTopic(),
-    phases: [{ name: 'Préparation', seconds: prep }, { name: 'Prise de parole', seconds: speak }, { name: 'Petit bilan', seconds: review }],
+    topic: chooseDifferent(design.prompts),
+    roles: shuffle(design.roles),
+    phases: design.phases.map((name, index) => ({ name, seconds: [first, second, third][index] })),
     phaseIndex: 0,
-    remaining: prep,
+    remaining: first,
     endAt: null,
     running: false,
+    counter: 0,
+    checkedItems: Array(design.widget?.type === 'checklist' ? design.widget.items.length : 0).fill(false),
+    fillValues: Array(design.widget?.type === 'fill' ? design.widget.items.length : 0).fill(''),
+    round: 0,
   }
   renderSession()
 }
 
-function randomTopic(): string {
-  return topics[Math.floor(Math.random() * topics.length)]
+function chooseDifferent(values: string[], current = ''): string {
+  const alternatives = values.filter((value) => value !== current)
+  const choices = alternatives.length ? alternatives : values
+  return choices[Math.floor(Math.random() * choices.length)] ?? ''
+}
+
+function shuffle<T>(values: T[]): T[] {
+  const result = [...values]
+  for (let index = result.length - 1; index > 0; index -= 1) {
+    const swap = Math.floor(Math.random() * (index + 1))
+    ;[result[index], result[swap]] = [result[swap], result[index]]
+  }
+  return result
+}
+
+function renderGameWidget(current: PracticeSession): string {
+  const widget = current.exercise.design.widget
+  if (!widget) return ''
+  if (widget.type === 'counter') {
+    return `<section class="game-widget" aria-label="${escapeHtml(widget.title)}"><div class="widget-heading"><h2>${escapeHtml(widget.title)}</h2><p>${escapeHtml(widget.description ?? '')}</p></div><div class="counter-control"><button data-action="counter-change" data-delta="-1" aria-label="Retirer une occurrence">−</button><output aria-live="polite">${current.counter}</output><button data-action="counter-change" data-delta="1" aria-label="Ajouter une occurrence">+</button><span>${escapeHtml(widget.unit ?? '')}${current.counter > 1 ? 's' : ''}</span></div></section>`
+  }
+  if (widget.type === 'checklist') {
+    return `<section class="game-widget"><div class="widget-heading"><h2>${escapeHtml(widget.title)}</h2></div><ul class="widget-checklist">${widget.items.map((item, index) => `<li><button data-action="toggle-check" data-index="${index}" aria-pressed="${current.checkedItems[index] ? 'true' : 'false'}" class="check-item ${current.checkedItems[index] ? 'checked' : ''}"><span aria-hidden="true">${current.checkedItems[index] ? '✓' : ''}</span>${escapeHtml(item)}</button></li>`).join('')}</ul></section>`
+  }
+  if (widget.type === 'fill') {
+    return `<section class="game-widget"><div class="widget-heading"><h2>${escapeHtml(widget.title)}</h2><p>Ces mots restent dans votre navigateur et ne sont pas ajoutés au bilan.</p></div><div class="fill-fields">${widget.items.map((item, index) => `<label>${escapeHtml(item)}<input data-fill-index="${index}" maxlength="90" value="${escapeHtml(current.fillValues[index] ?? '')}" placeholder="Complétez à votre façon"></label>`).join('')}</div></section>`
+  }
+  const role = current.roles[current.round % current.roles.length] ?? ''
+  return `<section class="game-widget"><div class="widget-heading"><h2>${escapeHtml(widget.title)}</h2><p>${escapeHtml(widget.description ?? '')}</p></div><div class="turn-card"><span>TOUR ${current.round + 1}</span><strong>${escapeHtml(role)}</strong><button class="button button-outline" data-action="next-turn">Tour suivant →</button></div></section>`
 }
 
 function renderSession(): void {
   if (!session) return
   const phase = session.phases[session.phaseIndex]
+  const design = session.exercise.design
   const total = session.phases.reduce((sum, item) => sum + item.seconds, 0)
   const elapsed = total - session.phases.slice(0, session.phaseIndex).reduce((sum, item) => sum + item.seconds, 0) - session.remaining
   const progress = Math.max(0, Math.min(100, elapsed / total * 100))
@@ -291,17 +345,20 @@ function renderSession(): void {
       <button class="back-link" data-action="exit-session">← Quitter la séance</button>
       <div class="session-layout">
         <div class="session-left">
-          <p class="eyebrow">${escapeHtml(session.exercise.title)} <i></i> ÉTAPE ${session.phaseIndex + 1} SUR 3</p>
+          <p class="eyebrow">${escapeHtml(session.exercise.title)} <i></i> ÉTAPE ${session.phaseIndex + 1} SUR ${session.phases.length}</p>
           <h1>${escapeHtml(phase.name)}<span class="title-period">.</span></h1>
-          <p class="session-instruction">${session.phaseIndex === 0 ? 'Lisez le sujet, prenez quelques notes si cela vous aide, puis préparez votre première phrase.' : session.phaseIndex === 1 ? 'C’est à vous. Parlez à votre rythme, et laissez-vous le droit de chercher vos mots.' : 'Qu’est-ce qui a bien fonctionné ? Choisissez une petite chose à essayer la prochaine fois.'}</p>
-          <div class="topic-card"><span class="topic-label">VOTRE SUJET</span><p>${escapeHtml(session.topic)}</p><button class="topic-refresh" data-action="new-topic" aria-label="Tirer un autre sujet">↻ <span>Autre sujet</span></button></div>
+          <p class="session-instruction">${escapeHtml(design.instructions[session.phaseIndex] ?? design.guidance)}</p>
+          <div class="topic-card"><span class="topic-label">${escapeHtml(design.promptLabel).toLocaleUpperCase('fr')}</span><p>${escapeHtml(session.topic)}</p><button class="topic-refresh" data-action="new-topic" aria-label="Tirer une autre consigne">↻ <span>Autre proposition</span></button></div>
+          ${session.roles.length > 1 ? `<section class="roles-panel"><div class="roles-heading"><span class="topic-label">RÔLES POUR CETTE PARTIE</span><button data-action="reroll-roles">Réattribuer ↻</button></div><div class="role-chips">${session.roles.map((role, index) => `<span class="role-chip"><b>${index + 1}</b>${escapeHtml(role)}</span>`).join('')}</div></section>` : ''}
+          <div class="session-materials"><span class="topic-label">MATÉRIEL</span><p>${design.materials.map(escapeHtml).join(' · ')}</p></div>
+          ${renderGameWidget(session)}
           <div class="phase-track" aria-label="Progression de la séance">${session.phases.map((item, index) => `<div class="phase-step ${index < session!.phaseIndex ? 'done' : index === session!.phaseIndex ? 'current' : ''}"><span>${index < session!.phaseIndex ? '✓' : `0${index + 1}`}</span>${item.name}</div>`).join('')}</div>
         </div>
         <aside class="timer-card">
           <span class="timer-kicker">TEMPS POUR VOUS</span>
           <div class="timer" role="timer" aria-live="off">${formatTime(session.remaining)}</div>
           <div class="timer-progress"><span style="width:${progress}%"></span></div>
-          <div class="timer-controls"><button class="button button-primary" data-action="toggle-timer">${session.running ? 'Pause' : session.remaining === phase.seconds ? 'Démarrer' : 'Reprendre'} <span>${session.running ? 'Ⅱ' : '▶'}</span></button><button class="button button-outline" data-action="reset-timer">Recommencer</button></div>
+          <div class="timer-controls"><button class="button button-primary" data-action="toggle-timer">${session.running ? 'Pause' : session.remaining === phase.seconds ? 'Démarrer' : 'Reprendre'} <span>${session.running ? 'Ⅱ' : '▶'}</span></button><button class="button button-outline" data-action="reset-timer">Recommencer cette phase</button><button class="text-button" data-action="advance-phase">${session.phaseIndex === session.phases.length - 1 ? 'Terminer la séance' : 'Passer à la suite →'}</button></div>
           <p class="timer-note">Le chrono est là pour vous accompagner, pas pour vous presser.</p>
         </aside>
       </div>
@@ -342,6 +399,21 @@ function syncTimer(): void {
     if (bar) bar.style.width = `${Math.max(0, elapsed / total * 100)}%`
   }
   if (!root!.querySelector('.session-left h1')?.textContent?.startsWith(session.phases[session.phaseIndex].name)) renderSession()
+}
+
+function advancePhase(): void {
+  if (!session) return
+  if (timerHandle !== undefined) window.clearInterval(timerHandle)
+  timerHandle = undefined
+  session.running = false
+  session.endAt = null
+  if (session.phaseIndex >= session.phases.length - 1) {
+    renderSessionComplete()
+    return
+  }
+  session.phaseIndex += 1
+  session.remaining = session.phases[session.phaseIndex].seconds
+  renderSession()
 }
 
 function renderSessionComplete(): void {
@@ -385,9 +457,29 @@ root.addEventListener('click', (event) => {
     if (exercise) startSession(exercise)
   }
   if (action === 'new-topic' && session) {
-    session.topic = randomTopic()
+    session.topic = chooseDifferent(session.exercise.design.prompts, session.topic)
     renderSession()
   }
+  if (action === 'reroll-roles' && session) {
+    session.roles = shuffle(session.exercise.design.roles)
+    renderSession()
+  }
+  if (action === 'counter-change' && session) {
+    session.counter = Math.max(0, session.counter + Number(target.dataset.delta ?? 0))
+    renderSession()
+  }
+  if (action === 'toggle-check' && session) {
+    const index = Number(target.dataset.index)
+    if (Number.isInteger(index) && index >= 0 && index < session.checkedItems.length) {
+      session.checkedItems[index] = !session.checkedItems[index]
+      renderSession()
+    }
+  }
+  if (action === 'next-turn' && session) {
+    session.round += 1
+    renderSession()
+  }
+  if (action === 'advance-phase' && session) advancePhase()
   if (action === 'toggle-timer' && session) {
     session.running = !session.running
     if (session.running) {
@@ -457,6 +549,15 @@ root.addEventListener('submit', (event) => {
     warning.setAttribute('role', 'alert')
     warning.textContent = 'Le navigateur n’a pas pu enregistrer votre bilan. Vous pouvez copier votre note avant de quitter.'
     root!.querySelector('.reflection-form')?.prepend(warning)
+  }
+})
+
+root.addEventListener('input', (event) => {
+  const input = event.target
+  if (!(input instanceof HTMLInputElement) || input.dataset.fillIndex === undefined || !session) return
+  const index = Number(input.dataset.fillIndex)
+  if (Number.isInteger(index) && index >= 0 && index < session.fillValues.length) {
+    session.fillValues[index] = input.value.slice(0, 90)
   }
 })
 
