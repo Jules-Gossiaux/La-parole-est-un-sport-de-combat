@@ -2,7 +2,7 @@
 
 ## État observé
 
-Le dépôt ne contient actuellement que `PRD.md` et `.vscode/settings.json`. Il n’existe pas encore de code, de framework, de modèle de données, de workflow CI ou de configuration de déploiement.
+Le dépôt contient le PRD, le catalogue éditorial et la documentation de cadrage, mais pas encore de code applicatif. Il n’existe pas de framework, de modèle de données, de workflow CI ou de configuration de déploiement.
 
 ## Cible produit
 
@@ -24,4 +24,4 @@ Dates des séances devront distinguer l’instant enregistré et son affichage d
 
 ## Contenu
 
-Le PRD référence `EXERCICES.md`, absent du dépôt. Son origine mentionnée est un ouvrage publié; chaque fiche future doit être formulée de façon originale et faire l’objet d’une vérification des droits avant publication.
+Le catalogue de départ est dans `EXERCICES.md`. Son origine éditoriale est un ouvrage publié; vérifier les droits avant toute publication commerciale et garder les formulations du projet originales.

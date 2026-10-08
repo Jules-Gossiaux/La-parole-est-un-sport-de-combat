@@ -2,7 +2,7 @@
 
 ## 2026-10-08 — Initialiser la documentation avant l’application
 
-**Contexte :** le dépôt était sans historique Git et ne contenait que le PRD et un fichier VS Code vide.
+**Contexte :** le dépôt était sans historique Git et ne contenait que le PRD et un fichier VS Code vide. Le catalogue d’exercices a depuis été ajouté dans ce dossier.
 
 **Décision :** poser les règles de contribution, le statut observé, les limites éditoriales et les objectifs de tests avant de choisir une stack.
 
@@ -20,5 +20,5 @@
 
 - Stack et navigateurs cibles.
 - Politique de conservation des bilans et enregistrements.
-- Source et droits des contenus d’exercices; `EXERCICES.md` est absent.
+- Vérifier les droits des contenus du catalogue avant publication commerciale.
 - Hébergement, CI et procédure de publication.

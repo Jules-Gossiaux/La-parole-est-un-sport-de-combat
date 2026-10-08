@@ -18,13 +18,14 @@ Le MVP vise un accès sans compte, des séances courtes et un historique conserv
 
 - [Règles de travail](RULES.md)
 - [Contribution](CONTRIBUTING.md)
-- [Architecture](docsARCHITECTURE.md)
-- [Développement](docsDEVELOPMENT.md)
-- [Tests](docsTESTING.md)
-- [Roadmap](docsROADMAP.md)
-- [Décisions](docsDECISIONS.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Développement](docs/DEVELOPMENT.md)
+- [Tests](docs/TESTING.md)
+- [Roadmap](docs/ROADMAP.md)
+- [Décisions](docs/DECISIONS.md)
+- [Catalogue d’exercices](docs/EXERCICES.md)
 - [Changelog](CHANGELOG.md)
 
 ## Contenu éditorial
 
-Le PRD cite `EXERCICES.md`, qui n’est pas présent dans ce dépôt. Les exercices publiables devront être rédigés en formulations originales et leurs droits vérifiés avant diffusion commerciale.
+Le catalogue d’exercices est dans `docs/EXERCICES.md`. Il reformule les exercices référencés par le PRD; vérifier les droits éditoriaux avant toute publication commerciale.

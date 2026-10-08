@@ -15,4 +15,4 @@ Aucune variable d’environnement n’est actuellement requise. Ne jamais ajoute
 
 ## Dépannage
 
-Il n’existe pas encore de commande applicative à dépanner. Consulter `PRD.md` pour le périmètre et `docsDECISIONS.md` pour les hypothèses en attente.
+Il n’existe pas encore de commande applicative à dépanner. Consulter `../PRD.md` pour le périmètre, `DECISIONS.md` pour les hypothèses en attente et `EXERCICES.md` pour le catalogue éditorial.

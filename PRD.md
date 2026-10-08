@@ -67,7 +67,7 @@ Le site doit être un compagnon d’entraînement : il donne une structure, mais
 
 ## Catalogue d’exercices prévu
 
-Le document [EXERCICES.md](EXERCICES.md) contient les consignes détaillées et les variantes. Le MVP couvre les exercices suivants :
+Le document [docs/EXERCICES.md](docs/EXERCICES.md) contient les consignes détaillées et les variantes. Le MVP couvre les exercices suivants :
 
 | Thème | Exercices | Mode principal |
 |---|---|---|
@@ -109,4 +109,4 @@ Le document [EXERCICES.md](EXERCICES.md) contient les consignes détaillées et 
 
 ## Références éditoriales
 
-Les pages indiquées dans [EXERCICES.md](EXERCICES.md) sont les pages du PDF fourni dans la conversation. Elles servent à retrouver les passages sources; les consignes de ce projet sont reformulées en langage pratique.
+Les pages indiquées dans [docs/EXERCICES.md](docs/EXERCICES.md) sont les pages du PDF fourni dans la conversation. Elles servent à retrouver les passages sources; les consignes de ce projet sont reformulées en langage pratique.
