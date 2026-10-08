@@ -8,6 +8,8 @@ node_modules/
 dist/
 build/
 coverage/
+.vercel/
+*.log
 
 # Système et éditeurs
 .DS_Store

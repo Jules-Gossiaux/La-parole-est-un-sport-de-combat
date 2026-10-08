@@ -18,7 +18,23 @@
 
 ## En attente
 
-- Stack et navigateurs cibles.
+- Confirmer que l’hébergement Hobby Vercel sera réservé à un usage non commercial.
 - Politique de conservation des bilans et enregistrements.
-- Vérifier les droits des contenus du catalogue avant publication commerciale.
-- Hébergement, CI et procédure de publication.
+- Vérifier les droits des contenus du catalogue avant publication.
+- Relier le projet Vercel au dépôt GitHub et choisir la procédure de publication.
+
+## 2026-10-08 — Prototype statique pour l’hébergement gratuit
+
+**Contexte :** le souhait est d’héberger le projet sur Vercel sans frais récurrents.
+
+**Décision :** utiliser Vite et TypeScript pour produire un site statique, sans backend, fournisseur d’authentification, base distante ni service tiers. Les bilans sont gardés dans `localStorage`.
+
+**Conséquences :** pas de frais serveur dans l’architecture actuelle et pas de synchronisation entre appareils. Les conditions Vercel Hobby limitent le plan gratuit aux usages personnels ou non commerciaux. La sortie peut être déployée sur un sous-domaine Vercel gratuit; un domaine personnalisé peut être payant.
+
+## 2026-10-08 — Limiter le MVP à huit exercices
+
+**Contexte :** le catalogue de 32 fiches donnait l’impression que tout était déjà prêt, alors que le premier périmètre doit rester concentré.
+
+**Décision :** commencer avec huit exercices qui couvrent voix, vocabulaire, discours, débat, entretien et médias. Afficher les 24 autres comme « Bientôt disponible » sans les rendre lançables.
+
+**Conséquences :** la disponibilité est explicitement séparée du catalogue éditorial. Les identifiants 5, 6, 12, 13, 14, 16, 22 et 28 correspondent aux fiches actives du PRD.

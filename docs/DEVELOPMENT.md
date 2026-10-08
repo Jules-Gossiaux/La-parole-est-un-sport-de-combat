@@ -1,18 +1,26 @@
 # Développement
 
-## État actuel
+## Stack
 
-Aucun environnement applicatif n’est configuré. La stack, les versions de runtime, les dépendances, les commandes et le déploiement restent à choisir. Le dépôt Git a été initialisé localement.
+Vite + TypeScript, sans framework UI ni dépendance runtime. La sortie est un site statique adapté à Vercel. Le plan Hobby est gratuit pour un usage personnel ou non commercial selon les conditions Vercel; un projet commercial requiert une autre formule.
 
 ## Prérequis observés à l’initialisation
 
 - Git 2.54.0.windows.1
-- Node.js v24.15.0 et npm 11.14.1 sont disponibles sur la machine; leur utilisation par le projet n’est pas encore décidée.
+- Node.js 22.12 ou plus récent.
+- npm.
+
+## Commandes
+
+- `npm install` : installer les dépendances de développement.
+- `npm run dev` : démarrer le serveur local Vite.
+- `npm run build` : vérifier le typage TypeScript puis générer `dist/`.
+- `npm run preview` : prévisualiser le build local.
 
 ## Variables et secrets
 
-Aucune variable d’environnement n’est actuellement requise. Ne jamais ajouter de secret au dépôt. Si des variables deviennent nécessaires, documenter leur usage et fournir un fichier d’exemple sans valeur sensible.
+Aucune variable d’environnement n’est requise. Le prototype ne nécessite aucune fonction Vercel, base de données, clé API ou service payant.
 
 ## Dépannage
 
-Il n’existe pas encore de commande applicative à dépanner. Consulter `../PRD.md` pour le périmètre, `DECISIONS.md` pour les hypothèses en attente et `EXERCICES.md` pour le catalogue éditorial.
+Si le build échoue, vérifier la version de Node et relancer `npm install`. Consulter `../PRD.md` pour le périmètre, `DECISIONS.md` pour les hypothèses et `EXERCICES.md` pour le catalogue.
