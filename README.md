@@ -4,15 +4,22 @@ Compagnon web francophone pour s’entraîner à la prise de parole, seul, à de
 
 ## État du projet
 
-Initialisation du dépôt et cadrage documentaire. Aucun prototype applicatif ni catalogue d’exercices n’est encore présent. Les fonctionnalités du PRD sont des objectifs, pas des fonctionnalités livrées.
+Prototype web initial : 8 exercices MVP interactifs et 24 exercices annoncés comme bientôt disponibles. Le prototype inclut les fiches, les sujets aléatoires, le chronomètre en trois phases et un bilan privé dans le navigateur. L’enregistrement audio, la génération de rôles, l’édition des bilans et les contrôles automatisés restent à faire.
 
 ## Démarrage
 
-Aucune commande d’installation ou de démarrage n’est disponible pour le moment : la stack n’a pas encore été choisie et aucun code applicatif n’a été ajouté.
+Prérequis : Node.js 22.12 ou plus récent et npm.
+
+```bash
+npm install
+npm run dev
+```
+
+Pour produire les fichiers statiques destinés à Vercel : `npm run build`. Le dossier de sortie est `dist/`.
 
 ## Produit et confidentialité
 
-Le MVP vise un accès sans compte, des séances courtes et un historique conservé dans le navigateur. L’enregistrement audio est facultatif, local et explicite dans le PRD; son implémentation et ses limites navigateur restent à définir. Ne saisissez pas de données sensibles dans un prototype futur avant que son stockage soit documenté.
+Le prototype n’exige pas de compte. Les bilans sont conservés dans le `localStorage` du navigateur et peuvent être effacés depuis « Mes séances ». Ils ne sont pas synchronisés entre appareils. Aucun enregistrement audio n’est encore disponible. Vercel réserve son [plan Hobby gratuit](https://vercel.com/docs/plans/hobby) aux usages personnels ou non commerciaux. L’adresse `*.vercel.app` est l’option sans achat; un domaine personnalisé peut coûter.
 
 ## Documentation
 
