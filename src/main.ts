@@ -15,11 +15,13 @@ type GameDesign = {
   promptLabel: string
   prompts: string[]
   roles: string[]
+  roleTasks: string[]
   materials: string[]
   instructions: string[]
   phases: [string, string, string]
   weights: [number, number, number]
   phaseSeconds?: [number, number, number]
+  widgetPhase?: number
   guidance: string
   widget?: GameWidget
 }
@@ -285,7 +287,7 @@ function startSession(exercise: Exercise): void {
   session = {
     exercise,
     topic: chooseDifferent(design.prompts),
-    roles: shuffle(design.roles),
+    roles: [...design.roles],
     phases: design.phases.map((name, index) => ({ name, seconds: [first, second, third][index] })),
     phaseIndex: 0,
     remaining: first,
@@ -305,18 +307,9 @@ function chooseDifferent(values: string[], current = ''): string {
   return choices[Math.floor(Math.random() * choices.length)] ?? ''
 }
 
-function shuffle<T>(values: T[]): T[] {
-  const result = [...values]
-  for (let index = result.length - 1; index > 0; index -= 1) {
-    const swap = Math.floor(Math.random() * (index + 1))
-    ;[result[index], result[swap]] = [result[swap], result[index]]
-  }
-  return result
-}
-
 function renderGameWidget(current: PracticeSession): string {
   const widget = current.exercise.design.widget
-  if (!widget) return ''
+  if (!widget || (current.exercise.design.widgetPhase !== undefined && current.phaseIndex !== current.exercise.design.widgetPhase)) return ''
   if (widget.type === 'counter') {
     return `<section class="game-widget" aria-label="${escapeHtml(widget.title)}"><div class="widget-heading"><h2>${escapeHtml(widget.title)}</h2><p>${escapeHtml(widget.description ?? '')}</p></div><div class="counter-control"><button data-action="counter-change" data-delta="-1" aria-label="Retirer une occurrence">−</button><output aria-live="polite">${current.counter}</output><button data-action="counter-change" data-delta="1" aria-label="Ajouter une occurrence">+</button><span>${escapeHtml(widget.unit ?? '')}${current.counter > 1 ? 's' : ''}</span></div></section>`
   }
@@ -340,23 +333,25 @@ function renderSession(): void {
   root!.innerHTML = shell(`
     <section class="session-page">
       <button class="back-link" data-action="exit-session">← Quitter la séance</button>
-      <div class="session-layout">
-        <div class="session-left">
-          <p class="eyebrow">${escapeHtml(session.exercise.title)} <i></i> ÉTAPE ${session.phaseIndex + 1} SUR ${session.phases.length}</p>
-          <h1>${escapeHtml(phase.name)}<span class="title-period">.</span></h1>
-          <p class="session-instruction">${escapeHtml(design.instructions[session.phaseIndex] ?? design.guidance)}</p>
-          <div class="topic-card"><span class="topic-label">${escapeHtml(design.promptLabel).toLocaleUpperCase('fr')}</span><p>${escapeHtml(session.topic)}</p><button class="topic-refresh" data-action="new-topic" aria-label="Tirer une autre consigne">↻ <span>Autre proposition</span></button></div>
-          ${session.roles.length > 1 ? `<section class="roles-panel"><div class="roles-heading"><span class="topic-label">RÔLES POUR CETTE PARTIE</span><button data-action="reroll-roles">Réattribuer ↻</button></div><div class="role-chips">${session.roles.map((role, index) => `<span class="role-chip"><b>${index + 1}</b>${escapeHtml(role)}</span>`).join('')}</div></section>` : ''}
-          <div class="session-materials"><span class="topic-label">MATÉRIEL</span><p>${design.materials.map(escapeHtml).join(' · ')}</p></div>
-          ${renderGameWidget(session)}
-          <div class="phase-track" aria-label="Progression de la séance">${session.phases.map((item, index) => `<div class="phase-step ${index < session!.phaseIndex ? 'done' : index === session!.phaseIndex ? 'current' : ''}"><span>${index < session!.phaseIndex ? '✓' : `0${index + 1}`}</span>${item.name}</div>`).join('')}</div>
+      <div class="phase-track" aria-label="Progression de la séance">${session.phases.map((item, index) => `<div class="phase-step ${index < session!.phaseIndex ? 'done' : index === session!.phaseIndex ? 'current' : ''}" ${index === session!.phaseIndex ? 'aria-current="step"' : ''}><span>${index < session!.phaseIndex ? '✓' : `0${index + 1}`}</span><b>${escapeHtml(item.name)}</b></div>`).join('')}</div>
+      <section class="current-step-card" aria-labelledby="current-step-title">
+        <div class="current-step-copy">
+          <p class="eyebrow">${escapeHtml(session.exercise.title)} · ÉTAPE ${session.phaseIndex + 1} SUR ${session.phases.length}</p>
+          <h1 id="current-step-title">${escapeHtml(phase.name)}<span class="title-period">.</span></h1>
+          <p class="session-instruction"><strong>À faire maintenant</strong>${escapeHtml(design.instructions[session.phaseIndex] ?? design.guidance)}</p>
         </div>
-        <aside class="timer-card">
-          <span class="timer-kicker">TEMPS POUR VOUS</span>
+        <aside class="timer-card" aria-label="Chronomètre de l’étape ${session.phaseIndex + 1}">
+          <span class="timer-kicker">TEMPS DE CETTE ÉTAPE</span>
           <div class="timer" role="timer" aria-live="off">${formatTime(session.remaining)}</div>
           <div class="timer-progress"><span style="width:${progress}%"></span></div>
-          <div class="timer-controls"><button class="button button-primary" data-action="toggle-timer">${session.running ? 'Pause' : session.remaining === phase.seconds ? 'Démarrer' : 'Reprendre'} <span>${session.running ? 'Ⅱ' : '▶'}</span></button><button class="button button-outline" data-action="reset-timer">Recommencer cette phase</button><button class="text-button" data-action="advance-phase">${session.phaseIndex === session.phases.length - 1 ? 'Terminer la séance' : 'Passer à la suite →'}</button></div>
+          <div class="timer-controls"><button class="button button-primary" data-action="toggle-timer">${session.running ? 'Pause' : session.remaining === phase.seconds ? 'Démarrer le chrono' : 'Reprendre le chrono'} <span aria-hidden="true">${session.running ? 'Ⅱ' : '▶'}</span></button><button class="button button-outline" data-action="advance-phase">${session.phaseIndex === session.phases.length - 1 ? 'Terminer l’exercice' : 'Étape suivante →'}</button></div>
         </aside>
+      </section>
+      ${renderGameWidget(session)}
+      <div class="session-context">
+        <div class="topic-card"><span class="topic-label">${escapeHtml(design.promptLabel).toLocaleUpperCase('fr')}</span><p>${escapeHtml(session.topic)}</p><button class="topic-refresh" data-action="new-topic" aria-label="Tirer une autre consigne">↻ <span>Autre proposition</span></button></div>
+        ${session.roles.length > 1 ? `<section class="roles-panel"><h2>Qui fait quoi ?</h2><ol class="role-list">${session.roles.map((role, index) => `<li><span class="role-name">${escapeHtml(role)}</span><span>${escapeHtml(design.roleTasks[index] ?? 'Participe selon la consigne de l’étape.')}</span></li>`).join('')}</ol></section>` : ''}
+        <details class="materials-details"><summary>Matériel et aide</summary><p>${design.materials.map(escapeHtml).join(' · ')}</p><p>${escapeHtml(design.guidance)}</p></details>
       </div>
     </section>
   `)
@@ -394,7 +389,7 @@ function syncTimer(): void {
     const bar = root!.querySelector<HTMLElement>('.timer-progress span')
     if (bar) bar.style.width = `${Math.max(0, elapsed / total * 100)}%`
   }
-  if (!root!.querySelector('.session-left h1')?.textContent?.startsWith(session.phases[session.phaseIndex].name)) renderSession()
+  if (!root!.querySelector('#current-step-title')?.textContent?.startsWith(session.phases[session.phaseIndex].name)) renderSession()
 }
 
 function advancePhase(): void {
@@ -456,10 +451,6 @@ root.addEventListener('click', (event) => {
     session.topic = chooseDifferent(session.exercise.design.prompts, session.topic)
     renderSession()
   }
-  if (action === 'reroll-roles' && session) {
-    session.roles = shuffle(session.exercise.design.roles)
-    renderSession()
-  }
   if (action === 'counter-change' && session) {
     session.counter = Math.max(0, session.counter + Number(target.dataset.delta ?? 0))
     renderSession()
@@ -487,15 +478,6 @@ root.addEventListener('click', (event) => {
       if (timerHandle !== undefined) window.clearInterval(timerHandle)
       timerHandle = undefined
     }
-    renderSession()
-  }
-  if (action === 'reset-timer' && session) {
-    if (timerHandle !== undefined) window.clearInterval(timerHandle)
-    timerHandle = undefined
-    session.running = false
-    session.endAt = null
-    session.phaseIndex = 0
-    session.remaining = session.phases[0].seconds
     renderSession()
   }
   if (action === 'exit-session') {

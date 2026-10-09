@@ -2,7 +2,7 @@
 
 ## État actuel
 
-`npm run build` exécute le contrôle TypeScript puis génère les fichiers statiques. `npm test` utilise le module de test intégré à Node et happy-dom pour vérifier les 32 correspondances catalogue/jeu et parcourir pour chaque exercice la fiche, la séance, l’outil dédié, les trois phases et l’enregistrement du bilan.
+`npm run build` exécute le contrôle TypeScript puis génère les fichiers statiques. `npm test` utilise le module de test intégré à Node et happy-dom pour vérifier les 32 correspondances catalogue/jeu, le changement d’étape et de consigne, les responsabilités attribuées dans l’ordre, les outils affichés à la bonne étape et l’enregistrement du bilan.
 
 ## Couverture à compléter
 

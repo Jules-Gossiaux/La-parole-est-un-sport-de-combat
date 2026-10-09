@@ -22,6 +22,8 @@ test('chaque jeu a des consignes, des rôles, du matériel, des sujets et trois 
     assert.ok(game.promptLabel, `exercice ${game.id}: libellé de consigne manquant`)
     assert.ok(game.prompts.length >= 2, `exercice ${game.id}: sujets insuffisants`)
     assert.ok(game.roles.length >= 1, `exercice ${game.id}: rôle manquant`)
+    assert.equal(game.roleTasks.length, game.roles.length > 1 ? game.roles.length : 0, `exercice ${game.id}: consigne de rôle manquante`)
+    assert.ok(game.roleTasks.every((task) => task.trim().length > 10), `exercice ${game.id}: responsabilité de rôle trop vague`)
     assert.ok(game.materials.length >= 1, `exercice ${game.id}: matériel non précisé`)
     assert.equal(game.instructions.length, 3, `exercice ${game.id}: il faut trois consignes de phase`)
     assert.equal(game.phases.length, 3, `exercice ${game.id}: il faut trois phases`)
@@ -40,6 +42,7 @@ test('la durée de chaque jeu est répartie en trois poids qui totalisent 100', 
       assert.equal(game.phaseSeconds.length, 3, `exercice ${game.id}: il faut trois durées`)
       assert.ok(game.phaseSeconds.every((seconds) => Number.isInteger(seconds) && seconds > 0))
     }
+    if (game.widget) assert.ok(Number.isInteger(game.widgetPhase) && game.widgetPhase >= 0 && game.widgetPhase < 3, `exercice ${game.id}: étape de l’outil manquante`)
   }
 })
 
